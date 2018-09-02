@@ -1,0 +1,59 @@
+{
+	"drinks": {	
+		"Cappuccino": {
+			"name": "Cappuccino", 
+            "price": 5.99,
+            "src": "../images/cappuccino.jpg"
+		},
+		"Latte Machiatto":{
+			"name": "Latte Machiatto",
+			"price": 4.99,
+			"src": "../images/latte.jpg"
+		},
+		"Espresso": {
+			"name": "Espresso",
+			"price": 4.99,
+			"src": "../images/espresso.jpg"
+		},
+		"Chocolate Frappe": {
+			"name": "Chocolate Frappe",
+			"price": 5.99,
+			"src": "../images/frappe.jpg"
+		},
+		"Classic Chocolate": {
+			"name": "Classic Chocolate",
+			"price": 4.99,
+			"src": "../images/chocolate.jpg"
+		}
+	},
+	"food": [
+
+	],
+	"deserts": [
+		{
+			"name": "Vanilla Cupcake",
+			"price": 2.49,
+			"src": "../images/cupcake.jpg"
+		},
+		{
+			"name": "Brownie",
+			"price": 1.99,
+			"src": "../images/brownie.jpg"
+		},
+		{
+			"name": "Tiramisu",
+			"price": 3.99,
+			"src": "../images/tiramisu.png"
+		},
+		{
+			"name": "Cheesecake",
+			"price": 3.99,
+			"src": "../images/cheesecake.jpg"
+		},
+		{
+			"name": "Lava Cake",
+			"price": 4.99,
+			"src": "../images/lavacake.jpg"
+		}
+	]
+}

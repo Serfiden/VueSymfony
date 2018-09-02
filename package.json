@@ -1,0 +1,25 @@
+{
+    "devDependencies": {
+        "@symfony/webpack-encore": "^0.20.0",
+        "vue-template-compiler": "^2.5.17",
+        "webpack-notifier": "^1.6.0"
+    },
+    "license": "UNLICENSED",
+    "private": true,
+    "scripts": {
+        "start": "concurrently --kill-others \"php bin/console server:run\" \"yarn run encore dev-server --host 127.0.0.1 --port 3000 --watch\" \"nodemon server.js\" ",
+        "dev-server": "encore dev-server",
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production"
+    },
+    "dependencies": {
+        "concurrently": "^4.0.1",
+        "nodemon": "^1.18.4",
+        "uuid": "^3.3.2",
+        "vue": "^2.5.17",
+        "vue-loader": "14.2.2",
+        "vue-router": "^3.0.1",
+        "websocket": "^1.0.26"
+    }
+}
