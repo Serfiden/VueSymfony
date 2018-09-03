@@ -23,11 +23,12 @@ const BARISTA_CLOCK_IN = (baristaID, message) => {
 	});
 }
 
-const BARISTA_CLOCK_OUT = (baristaID, message) => {
+const BARISTA_CLOCK_OUT = (baristaID, message, hadOrder = false) => {
 	return JSON.stringify({
 		type: 'BARISTA_CLOCK_IN',
 		baristaID: baristaID,
-		info: message
+		info: message,
+		hadOrder: hadOrder,
 	});
 }
 

@@ -2,13 +2,14 @@ import EventBus from './EventBus.js';
 import BaristaPartial from '../Templates/Barista.vue';
 import WsConnection from '../Services/WebsocketClient.js';
 import uuid from 'uuid/v4';
+import Message from '../Services/MessageGenerator.js';
+import model from '../Models/Barista.js';
 
 const STATUS_MESSAGES = {
 	CLOCKED_IN: 'Awaiting orders...',
 	CLOCKED_OUT: 'Good job today! Hope you\'re just as excited for tomorrow as our customers',
 	JUST_ARRIVED: 'Hey yo! Press the \'Start shift\' button when you\'re ready for the customers!'
 }
-
 
 BaristaPartial.data = function() {
 	return {
@@ -25,14 +26,19 @@ BaristaPartial.data = function() {
 		/** @type {uuid} - The ID of the client the current order belongs to */
 		clientID: null,
 		/** @type {string} - The barista's status, controlled by the Shift functions, to be displayed
-		* in the view */ 
-		status: STATUS_MESSAGES.JUST_ARRIVED
+		* in the view 
+		*/ 
+		status: STATUS_MESSAGES.JUST_ARRIVED,
+		/** @type {Barista} */
+		model: null,
 	}
 };
 
+
+
 BaristaPartial.created = function() {
-	this.connection = new WsConnection('BARISTA', this.baristaID);
 	this.baristaID = uuid();
+	this.model = new model(this);
 }
 
 BaristaPartial.methods = {
@@ -40,17 +46,9 @@ BaristaPartial.methods = {
 	* Make the current barista available for receiving orders
 	*/
 	startShift: function() {
-		this.connection.onmessage = (message) => {
-			const received = JSON.parse(message.data);
-			this.assignOrder(received.info);
-			this.clientID = received.clientID;
-		}
 		this.status = STATUS_MESSAGES.CLOCKED_IN;
-		this.connection.send(JSON.stringify({
-			type: 'BARISTA_CLOCK_IN',
-			baristaID: this.baristaID,
-			info: 'Barista clocked in',
-		}));
+		this.model.send('BARISTA_CLOCK_IN', 'Barista clocked in!');
+
 	},
 
 	/**
@@ -58,34 +56,28 @@ BaristaPartial.methods = {
 	*/
 	endShift: function() {
 		this.status = STATUS_MESSAGES.CLOCKED_OUT;
-		this.connection.send(JSON.stringify({
-			type: 'BARISTA_CLOCK_OUT',
-			baristaID: this.baristaID,
-			info: 'Barista clocked out',
-		}));
+		this.order = {};
+		this.orderID = null;
+		this.hasOrder = false;
+		this.clientID = null;
+		this.model.send('BARISTA_CLOCK_OUT', 'Barista clocked out!');
 	},
 
 	/**
 	* @param {Object} order - Object that holds all the information concerning a new order
 	* 
 	*/
-	assignOrder: function (order) {
+	assignOrder: function (order, clientID) {
 		this.order = order.items;
 		this.orderID = order.id;
+		this.clientID = clientID;
 	},
 
 	/** 
 	* Notify the server that the order is in progress
 	*/
 	acceptOrder: function () {
-		this.connection.send(JSON.stringify({
-			type: 'BARISTA_ORDER_UPDATE',
-			baristaID: this.baristaID,
-			clientID: this.clientID,
-			orderID: this.orderID,
-			status: 'ACCEPT',
-			comment: null
-		})); 
+		this.model.send('ACCEPT', this.clientID, this.orderID);
 		this.hasOrder = true;
 	},
 
@@ -94,15 +86,7 @@ BaristaPartial.methods = {
 	* Notify the server that the order that was assigned to the barista has been declined 
 	*/
 	declineOrder: function (declineReason = 'Order would take too long') {
-		console.log(this.clientID);
-		this.connection.send(JSON.stringify({
-			type: 'BARISTA_ORDER_UPDATE',
-			baristaID: this.baristaID,
-			clientID: this.clientID,
-			orderID: this.orderID,
-			status: 'DECLINE',
-			comment: declineReason
-		}));
+		this.model.send('DECLINE', this.clientID, this.orderID, declineReason);
 		this.order = {};
 	},
 
@@ -120,14 +104,7 @@ BaristaPartial.methods = {
 	* Notify the server that the order has been finished and update the view accordingly
 	*/
 	finishOrder: function () {
-		this.connection.send(JSON.stringify({
-			type: 'BARISTA_ORDER_UPDATE',
-			baristaID: this.baristaID,
-			clientID: this.clientID,
-			orderID: this.orderID,
-			status: 'DONE',
-			comment: null
-		}));
+		this.model.send('DONE', this.clientID, this.orderID);
 		this.hasOrder = false;	
 		this.orderID = null;
 	}
