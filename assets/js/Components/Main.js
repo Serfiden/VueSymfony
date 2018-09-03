@@ -54,7 +54,13 @@ Main.methods = {
 	* Currently sends the order to the server (in the future, the model will do that instead)
 	*/
 	orderSubmit: function () {
-		this.connection.send(Message('ORDER', this.clientID, this.orderID, this.order));
+		if (Object.keys(this.order).length !== 0) {
+			this.connection.send(Message('ORDER', this.clientID, this.orderID, this.order));
+			this.order = {};
+			this.orderID = uuid();
+		} else {
+			console.log('You can\'t send an empty order!');
+		}
 	}
 };
 

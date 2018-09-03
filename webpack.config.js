@@ -20,7 +20,7 @@ Encore
     .addEntry('login', './assets/js/Pages/Login.js')
     .addEntry('client', './assets/js/Pages/Client.js')
     .addEntry('barista', './assets/js/Pages/Barista.js')
-    //.addEntry('page2', './assets/js/page2.js')
+
     .addStyleEntry('app', './assets/css/app.css')
 
     /*

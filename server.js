@@ -85,6 +85,7 @@ wsServer.on('request',	 function(req) {
 				}; 
 			} else {
 				clients[data.clientID].order.info = data.info;
+				clients[data.clientID].order_status = ORDER_STATUSES.RECEIVED;
 			}
 
 			connection.send('Your order has been received!');
