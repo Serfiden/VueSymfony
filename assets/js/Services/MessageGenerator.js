@@ -4,10 +4,9 @@ const CLIENT_CONNECT = (data) => {
 	});
 }
 
-const ORDER = (clientID, orderID, orderItems) => {
+const ORDER = (orderID, orderItems) => {
 	return JSON.stringify({
 		type: 'ORDER',
-		clientID: clientID,
 		info: {
 			id: orderID,
 			items: orderItems
@@ -32,44 +31,40 @@ const BARISTA_CLOCK_OUT = (baristaID, message, hadOrder = false) => {
 	});
 }
 
-const BARISTA_ORDER_UPDATE = (baristaID, clientID, orderID, status, comment) => {
+const BARISTA_ORDER_UPDATE = (baristaID, orderID, status, comment) => {
 	const message = {
 		type: 'BARISTA_ORDER_UPDATE',
 		baristaID: baristaID,
-		clientID: clientID,
 		orderID: orderID,
 		status: status,
 		comment: comment
 	}
 }
 
-const ACCEPT_ORDER = (baristaID, clientID, orderID) => {
+const ACCEPT_ORDER = (baristaID, orderID) => {
 	return JSON.stringify({
 		type: 'BARISTA_ORDER_UPDATE',
 		baristaID: baristaID,
-		clientID: clientID,
 		orderID: orderID,
 		status: 'ACCEPT',
 		comment: null
 	});
 }
 
-const DECLINE_ORDER = (baristaID, clientID, orderID, reason) => {
+const DECLINE_ORDER = (baristaID, orderID, reason) => {
 	return JSON.stringify({
 		type: 'BARISTA_ORDER_UPDATE',
 		baristaID: baristaID,
-		clientID: clientID,
 		orderID: orderID,
 		status: 'DECLINE',
 		comment: reason
 	});
 }
 
-const FINISH_ORDER = (baristaID, clientID, orderID) => {
+const FINISH_ORDER = (baristaID, orderID) => {
 	return JSON.stringify({
 		type: 'BARISTA_ORDER_UPDATE',
 		baristaID: baristaID,
-		clientID: clientID,
 		orderID: orderID,
 		status: 'DONE',
 		comment: null

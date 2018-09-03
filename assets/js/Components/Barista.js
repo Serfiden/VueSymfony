@@ -23,11 +23,7 @@ BaristaPartial.data = function() {
 		hasOrder: false,
 		/** @type {Object} */
 		order: {},
-		/** @type {uuid} - The ID of the client the current order belongs to */
-		clientID: null,
-		/** @type {string} - The barista's status, controlled by the Shift functions, to be displayed
-		* in the view 
-		*/ 
+		/** @type {string} - The barista's status, controlled by the Shift functions, to be displayed in the view */ 
 		status: STATUS_MESSAGES.JUST_ARRIVED,
 		/** @type {Barista} */
 		model: null,
@@ -59,7 +55,6 @@ BaristaPartial.methods = {
 		this.order = {};
 		this.orderID = null;
 		this.hasOrder = false;
-		this.clientID = null;
 		this.model.send('BARISTA_CLOCK_OUT', 'Barista clocked out!');
 	},
 
@@ -67,17 +62,16 @@ BaristaPartial.methods = {
 	* @param {Object} order - Object that holds all the information concerning a new order
 	* 
 	*/
-	assignOrder: function (order, clientID) {
+	assignOrder: function (order) {
 		this.order = order.items;
 		this.orderID = order.id;
-		this.clientID = clientID;
 	},
 
 	/** 
 	* Notify the server that the order is in progress
 	*/
 	acceptOrder: function () {
-		this.model.send('ACCEPT', this.clientID, this.orderID);
+		this.model.send('ACCEPT', this.orderID);
 		this.hasOrder = true;
 	},
 
@@ -86,7 +80,7 @@ BaristaPartial.methods = {
 	* Notify the server that the order that was assigned to the barista has been declined 
 	*/
 	declineOrder: function (declineReason = 'Order would take too long') {
-		this.model.send('DECLINE', this.clientID, this.orderID, declineReason);
+		this.model.send('DECLINE', this.orderID, declineReason);
 		this.order = {};
 	},
 
@@ -104,7 +98,7 @@ BaristaPartial.methods = {
 	* Notify the server that the order has been finished and update the view accordingly
 	*/
 	finishOrder: function () {
-		this.model.send('DONE', this.clientID, this.orderID);
+		this.model.send('DONE', this.orderID);
 		this.hasOrder = false;	
 		this.orderID = null;
 	}

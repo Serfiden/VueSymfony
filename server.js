@@ -19,6 +19,7 @@ const waitingQueue = [
 ];
 
 const MESSAGE_TYPES = {
+	CLIENT_CONNECT: 'CLIENT_CONNECT',
 	ORDER: 'ORDER',
 	BARISTA_CLOCK_IN: 'BARISTA_CLOCK_IN',
 	BARISTA_CLOCK_OUT: 'BARISTA_CLOCK_OUT',
@@ -31,16 +32,16 @@ const MESSAGE_TYPES = {
 */
 
 const MESSAGE_MAPPING = {
-	ORDER: () => {
+	'ORDER': () => {
 
 	},
-	BARISTA_CLOCK_IN: () => {
+	'BARISTA_CLOCK_IN': () => {
 
 	},
-	BARISTA_CLOCK_OUT: () => {
+	'BARISTA_CLOCK_OUT': () => {
 
 	},
-	BARISTA_ORDER_UPDATE: () => {
+	'BARISTA_ORDER_UPDATE': () => {
 
 	}
 }
@@ -83,7 +84,7 @@ wsServer.on('request',	 function(req) {
 					order_status: ORDER_STATUSES.RECEIVED
 				}; 
 			} else {
-				clients[data.clientID].order = data.info;
+				clients[data.clientID].order.info = data.info;
 			}
 
 			connection.send('Your order has been received!');
@@ -96,6 +97,8 @@ wsServer.on('request',	 function(req) {
 				if (baristas.hasOwnProperty(key) && !baristas[key].busy_status) {
 					baristas[key].connection.send(JSON.stringify(clients[data.clientID].order));
 					baristas[key].busy_status = true;
+					baristas[key].clientID = data.clientID;
+					baristas[key].orderID = data.info.id;
 					clients[data.clientID].order_status = ORDER_STATUSES.PROCESSED;
 					connection.send('Your order has been dispatched to a barista');
 					break;
@@ -128,7 +131,7 @@ wsServer.on('request',	 function(req) {
 			}
 		} else if (data.type === MESSAGE_TYPES.BARISTA_ORDER_UPDATE) {
 			const orderStatus = data.status;
-			const clientID = data.clientID;
+			const clientID = baristas[data.baristaID].clientID;
 			if (orderStatus === 'DONE') {
 				baristas[data.baristaID].busy_status = false;
 				clients[clientID].connection.send('Your order is now ready for you!');
