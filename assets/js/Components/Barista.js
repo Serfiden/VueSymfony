@@ -20,7 +20,7 @@ BaristaPartial.data = function() {
 		/** @type {uuid} */
 		baristaID: null,
 		/** @type {boolean} - Indicates whether the barista is currently handling an order */
-		hasOrder: false,
+		hasJob: false,
 		/** @type {Object} */
 		order: {},
 		/** @type {string} - The barista's status, controlled by the Shift functions, to be displayed in the view */ 
@@ -54,7 +54,7 @@ BaristaPartial.methods = {
 		this.status = STATUS_MESSAGES.CLOCKED_OUT;
 		this.order = {};
 		this.orderID = null;
-		this.hasOrder = false;
+		this.hasJob = false;
 		this.model.send('BARISTA_CLOCK_OUT', 'Barista clocked out!');
 	},
 
@@ -72,7 +72,7 @@ BaristaPartial.methods = {
 	*/
 	acceptOrder: function () {
 		this.model.send('ACCEPT', this.orderID);
-		this.hasOrder = true;
+		this.hasJob = true;
 	},
 
 	/**
@@ -99,7 +99,7 @@ BaristaPartial.methods = {
 	*/
 	finishOrder: function () {
 		this.model.send('DONE', this.orderID);
-		this.hasOrder = false;	
+		this.hasJob = false;	
 		this.orderID = null;
 	}
 };
