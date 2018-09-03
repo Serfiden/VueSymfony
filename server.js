@@ -4,6 +4,8 @@ let server = http.createServer(function(req, res) {
 
 });
 
+/** Both the clients and the baristas consts will be used to store the connections of these two types */
+
 const clients = {
 
 };
@@ -22,6 +24,11 @@ const MESSAGE_TYPES = {
 	BARISTA_CLOCK_OUT: 'BARISTA_CLOCK_OUT',
 	BARISTA_ORDER_UPDATE: 'BARISTA_ORDER_UPDATE'
 }
+
+/** IMPORTANT: Currently unused const 
+* Will be used to map the logic for each message type that is currently written in a big block
+* below to the corresponding message type
+*/
 
 const MESSAGE_MAPPING = {
 	ORDER: () => {
@@ -54,18 +61,25 @@ let wsServer = new WebSocketServer({
 });
 
 wsServer.on('request',	 function(req) {
-	let connection = req.accept(null, req.origin);
+	const connection = req.accept(null, req.origin);
 	console.log((new Date()) + ' Connection from origin ' + req.origin);
 
 	connection.on('message', function(message) {
 		const data = JSON.parse(message.utf8Data);
-		console.log(data.type);
+		
+		/** All the logic in the next conditional blocks will be handled by separate functions, in the near future,
+		* according the mapping established in the MESSAGE_MAPPING const
+		*/
+
 		if (data.type === MESSAGE_TYPES.ORDER) {
 			/** If the message has been sent by a client, store the connection to him and his order */
 			if (clients[data.clientID] === undefined) {
 				clients[data.clientID] = {
 					connection: connection,
-					order: data.info,
+					order: {
+						clientID: data.clientID,
+						info: data.info
+					},
 					order_status: ORDER_STATUSES.RECEIVED
 				}; 
 			} else {
@@ -79,14 +93,12 @@ wsServer.on('request',	 function(req) {
 			*/
 
 			for (key in baristas) {
-				if (baristas.hasOwnProperty(key)) {
-					if (!baristas[key].busy_status) {
-						baristas[key].connection.send(JSON.stringify(clients[data.clientID].order));
-						baristas[key].busy_status = true;
-						clients[data.clientID].order_status = ORDER_STATUSES.PROCESSED;
-						connection.send('Your order has been dispatched to a barista');
-						break;
-					}
+				if (baristas.hasOwnProperty(key) && !baristas[key].busy_status) {
+					baristas[key].connection.send(JSON.stringify(clients[data.clientID].order));
+					baristas[key].busy_status = true;
+					clients[data.clientID].order_status = ORDER_STATUSES.PROCESSED;
+					connection.send('Your order has been dispatched to a barista');
+					break;
 				}
 			}
 
@@ -115,7 +127,17 @@ wsServer.on('request',	 function(req) {
 				busy_status: true
 			}
 		} else if (data.type === MESSAGE_TYPES.BARISTA_ORDER_UPDATE) {
-
+			const orderStatus = data.status;
+			const clientID = data.clientID;
+			if (orderStatus === 'DONE') {
+				baristas[data.baristaID].busy_status = false;
+				clients[clientID].connection.send('Your order is now ready for you!');
+			} else if (orderStatus === 'ACCEPT') {
+				clients[clientID].connection.send('Your order has been accepted by a barista and is in progress!');
+			} else if (orderStatus === 'DECLINE') {
+				baristas[data.baristaID].busy_status = false;
+				clients[clientID].connection.send('A barista has declined your order for the following reason: ' + data.comment);
+			}
 		}
 	});
 	connection.on('close', function(connection) {
