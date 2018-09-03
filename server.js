@@ -3,6 +3,9 @@ let http = require('http');
 let server = http.createServer(function(req, res) {
 
 });
+let ClientModel = require('./src/Models/Client.js');
+let BaristaModel = require('./src/Models/Barista.js');
+let OrderModel = require('./src/Models/Order.js');
 
 /** Both the clients and the baristas consts will be used to store the connections of these two types */
 
@@ -71,21 +74,27 @@ wsServer.on('request',	 function(req) {
 		/** All the logic in the next conditional blocks will be handled by separate functions, in the near future,
 		* according the mapping established in the MESSAGE_MAPPING const
 		*/
-
 		if (data.type === MESSAGE_TYPES.ORDER) {
+			const clientID = data.clientID,
+				orderInfo = data.info;
+
+			/*
+				
+			*/
+
 			/** If the message has been sent by a client, store the connection to him and his order */
-			if (clients[data.clientID] === undefined) {
-				clients[data.clientID] = {
+			if (clients[clientID] === undefined) {
+				clients[clientID] = {
 					connection: connection,
-					order: {
-						clientID: data.clientID,
-						info: data.info
-					},
+					clientID: clientID,
+					orderID: orderInfo.id,
+					order: orderInfo.info,
 					order_status: ORDER_STATUSES.RECEIVED
 				}; 
 			} else {
-				clients[data.clientID].order.info = data.info;
-				clients[data.clientID].order_status = ORDER_STATUSES.RECEIVED;
+				clients[clientID].orderID = orderInfo.id;
+				clients[clientID].order = orderInfo.info;
+				clients[clientID].order_status = ORDER_STATUSES.RECEIVED;
 			}
 
 			connection.send('Your order has been received!');
@@ -96,11 +105,11 @@ wsServer.on('request',	 function(req) {
 
 			for (key in baristas) {
 				if (baristas.hasOwnProperty(key) && !baristas[key].busy_status) {
-					baristas[key].connection.send(JSON.stringify(clients[data.clientID].order));
+					baristas[key].connection.send(JSON.stringify(orderInfo));
 					baristas[key].busy_status = true;
-					baristas[key].clientID = data.clientID;
-					baristas[key].orderID = data.info.id;
-					clients[data.clientID].order_status = ORDER_STATUSES.PROCESSED;
+					baristas[key].clientID = clientID;
+					baristas[key].orderID = orderInfo.id;
+					clients[clientID].order_status = ORDER_STATUSES.PROCESSED;
 					connection.send('Your order has been dispatched to a barista');
 					break;
 				}
@@ -111,12 +120,13 @@ wsServer.on('request',	 function(req) {
 			* becomes available
 			*/
 
-			if (clients[data.clientID].order_status === ORDER_STATUSES.RECEIVED) {
+			if (clients[clientID].order_status !== ORDER_STATUSES.PROCESSED) {
 				waitingQueue.push({
-					clientID: data.clientID,
-					info: data.info
+					clientID: clientID,
+					orderID: orderInfo.id,
+					info: orderInfo.order
 				});
-				clients[data.clientID].order_status = ORDER_STATUSES.WAITING;
+				clients[clientID].order_status = ORDER_STATUSES.WAITING;
 				connection.send('All the baristas are busy! Your order will be processed soon');
 			}
 
@@ -124,6 +134,10 @@ wsServer.on('request',	 function(req) {
 			baristas[data.baristaID] = {
 				connection: connection,
 				busy_status: false
+			}
+			if (waitingQueue.length !== 0) {
+				let queuedOrder = waitingQueue.shift();
+				baristas[data.baristaID].connection.send(JSON.stringify(queuedOrder.info))
 			}
 		} else if (data.type === MESSAGE_TYPES.BARISTA_CLOCK_OUT) {
 			baristas[data.baristaID] = {

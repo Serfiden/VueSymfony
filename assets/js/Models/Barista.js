@@ -17,7 +17,7 @@ export default class Barista {
 		this.connection = new WsConnection('BARISTA', this.id);
 		this.connection.onmessage = (message) => {
 			let received = JSON.parse(message.data);
-			this.context.assignOrder(received.info);
+			this.context.assignOrder(received);
 		}
 	}
 
