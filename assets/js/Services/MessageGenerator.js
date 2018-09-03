@@ -4,7 +4,7 @@ const CLIENT_CONNECT = (data) => {
 	});
 }
 
-const ORDER = (orderID, orderItems) => {
+const ORDER = (clientID, orderID, orderItems) => {
 	return JSON.stringify({
 		type: 'ORDER',
 		info: {

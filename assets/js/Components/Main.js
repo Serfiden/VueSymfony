@@ -1,21 +1,28 @@
+import uuid from 'uuid/v4';
 import Main from '../Templates/Main.vue';
 import CoffeeMenu from './CoffeeMenu.js';
 import Cart from './Cart.js';
-import menuData from '../../data/MenuData.json';
 import EventBus from './EventBus.js';
 import WsConnection from '../Services/WebsocketClient.js';
-import uuid from 'uuid/v4';
+import Message from '../Services/MessageGenerator.js';
+import menuData from '../../data/MenuData.json';
 
 Main.data = function() {
 	return {
+		/** @type {Object<orderItem>} */
 		order: {},
+		/** @type {uuid} */
+		orderID: null,
+		/** @type {WebSocket} */
 		connection: null,
+		/** @type {uuid} */
 		clientID: null
 	}
 };
 
 Main.created = function() {
 	this.clientID = uuid();
+	this.orderID = uuid();
 	this.connection = new WsConnection('CLIENT', this.clientID);
 	EventBus.$on('order-submit', () => {
 		return this.orderSubmit();
@@ -26,6 +33,10 @@ Main.created = function() {
 }
 
 Main.methods = {
+	/*
+	* @param {Object}
+	* Adds an item to the current order and updates the view accordingly
+	*/
 	onItemAdd: function (orderItem) {
 		const {itemName, category} = orderItem;
 		if (this.order[itemName] === undefined) {
@@ -38,15 +49,12 @@ Main.methods = {
 			this.order[itemName].quantity ++;
 		}
 	},
+
+	/*
+	* Currently sends the order to the server (in the future, the model will do that instead)
+	*/
 	orderSubmit: function () {
-		this.connection.send(JSON.stringify({
-			type: 'ORDER',
-			clientID: this.clientID,
-			info: {
-				id: uuid(),
-				items: this.order
-			}
-		}));
+		this.connection.send(Message('ORDER', this.clientID, this.orderID, this.order));
 	}
 };
 
