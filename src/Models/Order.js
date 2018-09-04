@@ -1,6 +1,12 @@
 let uuid = require('uuid/v4');
 
-const 
+const STATUS_MESSAGES = {
+	'RECEIVED': 'Your order has been received!',
+	'WAITING': 'All the baristas are busy! Your order will be processed soon!',
+	'PROCESSED': 'Your order has been accepted by a barista and is in progress!',
+	'READY': 'Your order is now ready for you!',
+	'DECLINED': 'Your order has been returned to the top of the waiting queue',
+}
 
 class Order {
 	/*
@@ -11,26 +17,29 @@ class Order {
 		this.context = owner;
 		this.ID = uuid();
 		this.items = items;
-		this.status = 'RECEIVED';
+		this.setStatus('RECEIVED');
 	}
 
-	getOrderID() {
+	get orderID () {
 		return this.ID;
 	}
 
-	getOwnerID() {
+	get ownerID () {
 		return this.context.getID();
 	}
 
-	getStatus() {
+	get order_status () {
 		return this.status;
+	}
+
+	get info () {
+		return this.items;
 	}
 
 	setStatus(status) {
 		this.status = status;
-		this.context.onStatusUpdate();
+		this.context.send(STATUS_MESSAGES[status]);
 	}
-
 }
 
 module.exports = Order;

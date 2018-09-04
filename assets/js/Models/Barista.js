@@ -16,6 +16,7 @@ export default class Barista {
 		/** @type {WebSocket} connection - The connection object of this barista */
 		this.connection = new WsConnection('BARISTA', this.id);
 		this.connection.onmessage = (message) => {
+			console.log(message.data);
 			let received = JSON.parse(message.data);
 			this.context.assignOrder(received);
 		}

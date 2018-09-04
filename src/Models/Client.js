@@ -1,30 +1,30 @@
 let Order = require('./Order.js');
 
 class Client {
-	constructor(connection, clientID) {
-		this.clientID = clientID; 
+	constructor (connection, clientID) {
+		this.clientID = clientID;
 		this.connection = connection;
-		this.order = null;
+		this.order = null; 
 	}
 
-	getID() {
+	get ID () {
 		return this.clientID;
 	}
 
-	getConnection() {
-		return this.connection;
-	}
-
-	getOrder() {
+	get currentOrder () {
 		return this.order;
 	}
 
-	createOrder(items) {
+	get conn () {
+		return this.connection;
+	}
+
+	createOrder (items) {
 		this.order = new Order(items, this);
 	}
 
-	onStatusUpdate() {
-		
+	send (info) {
+		this.connection.send(info);
 	}
 }
 
