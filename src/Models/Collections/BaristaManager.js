@@ -7,7 +7,7 @@ class Baristas {
 
 	get available () {
 		for (let key in this.baristas) {
-			if (this.baristas.hasOwnProperty(key) && !this.baristas[key].busy_status) {
+			if (this.baristas.hasOwnProperty(key) && !this.baristas[key].isBusy()) {
 				return this.baristas[key];
 			}
 		}

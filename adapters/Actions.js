@@ -9,8 +9,6 @@ const ORDER_STATUSES = {
 	READY: 'READY'
 }
 
-/* Fully done */
-
 const ORDER = (clientID, orderItems, connection) => {
 	if (Clients.getClientByID(clientID) === null) {
 		Clients.createClient(connection, clientID);
@@ -22,8 +20,6 @@ const ORDER = (clientID, orderItems, connection) => {
 		Baristas.available.assignOrder(Clients.getClientByID(clientID).currentOrder);
 	}
 }
-
-/* Fully done */
 
 const BARISTA_CLOCK_IN = (baristaID, connection) => {
 	if (Baristas.getBaristaByID(baristaID) === null) {
@@ -39,6 +35,9 @@ const BARISTA_CLOCK_OUT = (baristaID) => {
 }
 
 const BARISTA_ORDER_UPDATE = (status, baristaID) => {
+	if (status === 'DECLINE') {
+		WaitingQueue.push(Baristas.getBaristaByID(baristaID).getOrder());
+	} 
 	Baristas.getBaristaByID(baristaID).updateOrderStatus(status);
 }
 
